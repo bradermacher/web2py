@@ -236,8 +236,8 @@ class AuthAPI(object):
         if active:
             result.append(self.__signature_columns[0])
         if created:
-            result.extend(self.__signature_columns[1:3]
-        result.extend(self.__signature_columns[3:]
+            result.extend(self.__signature_columns[1:3])
+        result.extend(self.__signature_columns[3:])
         return result
 
     def define_tables(self, username=None, signature=None, migrate=None,

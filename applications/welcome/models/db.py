@@ -136,12 +136,12 @@ if configuration.get('scheduler.enabled'):
 # minimal requirements for auditing (versioning) can be added to all tables
 # by uncommenting line below
 # -------------------------------------------------------------------------
-# db._common_fields.extend(auth.versioning_signature())
+db._common_fields.extend(auth.versioning_signature())
 
 # -------------------------------------------------------------------------
 # Define your tables below (or better in another model file) for example
 #
-# >>> db.define_table('mytable', Field('myfield', 'string'))
+db.define_table('mytable', Field('myfield', 'string'))
 #
 # Fields can be 'string','text','password','integer','double','boolean'
 #       'date','time','datetime','blob','upload', 'reference TABLENAME'
@@ -158,4 +158,4 @@ if configuration.get('scheduler.enabled'):
 # -------------------------------------------------------------------------
 # after defining tables, uncomment below to enable auditing
 # -------------------------------------------------------------------------
-# auth.enable_record_versioning(db)
+auth.enable_record_versioning(db)
