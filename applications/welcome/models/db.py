@@ -133,6 +133,12 @@ if configuration.get('scheduler.enabled'):
     scheduler = Scheduler(db, heartbeat=configuration.get('scheduler.heartbeat'))
 
 # -------------------------------------------------------------------------
+# minimal requirements for auditing (versioning) can be added to all tables
+# by uncommenting line below
+# -------------------------------------------------------------------------
+# db._common_fields.extend(auth.versioning_signature())
+
+# -------------------------------------------------------------------------
 # Define your tables below (or better in another model file) for example
 #
 # >>> db.define_table('mytable', Field('myfield', 'string'))

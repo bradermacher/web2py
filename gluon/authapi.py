@@ -180,48 +180,65 @@ class AuthAPI(object):
     def table_event(self):
         return self.db[self.settings.table_event_name]
 
+    @property
+    def __signature_columns(self):
+        if '__chached_signature_columns' not in self.__dict__:
+            settings = self.settings
+            request = current.request
+            T = current.T
+            reference_user = 'reference %s' % settings.table_user_name
+            ondelete = self.settings.ondelete
+
+            def lazy_user(auth=self):
+                return auth.user_id
+
+            def represent(id, record=None, s=settings):
+                try:
+                    user = s.table_user(id)
+                    return '%s %s' % (user.get("first_name", user.get("email")),
+                                      user.get("last_name", ''))
+                except:
+                    return id
+                    
+            self.__chached_signature_columns = (
+                Field('is_active', 'boolean',
+                      default=True,
+                      readable=False, writable=False,
+                      label=T('Is Active')),
+                Field('created_on', 'datetime',
+                      default=request.now,
+                      writable=False, readable=False,
+                      label=T('Created On')),
+                Field('created_by',
+                      reference_user,
+                      default=lazy_user, represent=represent,
+                      writable=False, readable=False,
+                      label=T('Created By'), ondelete=ondelete),
+                Field('modified_on', 'datetime',
+                      update=request.now, default=request.now,
+                      writable=False, readable=False,
+                      label=T('Modified On')),
+                Field('modified_by',
+                      reference_user, represent=represent,
+                      default=lazy_user, update=lazy_user,
+                      writable=False, readable=False,
+                      label=T('Modified By'),  ondelete=ondelete))
+        return self.__chached_signature_columns
+
     def define_signature(self):
         db = self.db
-        settings = self.settings
-        request = current.request
-        T = current.T
-        reference_user = 'reference %s' % settings.table_user_name
-
-        def lazy_user(auth=self):
-            return auth.user_id
-
-        def represent(id, record=None, s=settings):
-            try:
-                user = s.table_user(id)
-                return '%s %s' % (user.get("first_name", user.get("email")),
-                                  user.get("last_name", ''))
-            except:
-                return id
-        ondelete = self.settings.ondelete
         self.signature = Table(
             self.db, 'auth_signature',
-            Field('is_active', 'boolean',
-                  default=True,
-                  readable=False, writable=False,
-                  label=T('Is Active')),
-            Field('created_on', 'datetime',
-                  default=request.now,
-                  writable=False, readable=False,
-                  label=T('Created On')),
-            Field('created_by',
-                  reference_user,
-                  default=lazy_user, represent=represent,
-                  writable=False, readable=False,
-                  label=T('Created By'), ondelete=ondelete),
-            Field('modified_on', 'datetime',
-                  update=request.now, default=request.now,
-                  writable=False, readable=False,
-                  label=T('Modified On')),
-            Field('modified_by',
-                  reference_user, represent=represent,
-                  default=lazy_user, update=lazy_user,
-                  writable=False, readable=False,
-                  label=T('Modified By'),  ondelete=ondelete))
+            *self.__signature_columns)
+
+    def versioning_signature(self, active=False, created=False):
+        result = []
+        if active:
+            result.append(self.__signature_columns[0])
+        if created:
+            result.extend(self.__signature_columns[1:3]
+        result.extend(self.__signature_columns[3:]
+        return result
 
     def define_tables(self, username=None, signature=None, migrate=None,
                       fake_migrate=None):
